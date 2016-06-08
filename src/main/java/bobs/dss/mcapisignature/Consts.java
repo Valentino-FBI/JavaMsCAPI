@@ -28,5 +28,6 @@ public class Consts {
     final static String szOID_CP_GOST_R3411 = "1.2.643.2.2.9";
     final static String szOID_RSA_SHA1RSA = "1.2.840.113549.1.1.5";
     final static String szOID_RSA_SHA256RSA = "1.2.840.113549.1.1.11";
+    final static String szOID_RSA_SHA512RSA = "1.2.840.113549.1.1.13";
     //TODO add all alg
 }
