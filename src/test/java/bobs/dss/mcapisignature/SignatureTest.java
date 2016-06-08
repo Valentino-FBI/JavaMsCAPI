@@ -5,6 +5,7 @@
  */
 package bobs.dss.mcapisignature;
 
+import java.util.Base64;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -41,6 +42,20 @@ public class SignatureTest {
         signature.setSignatureAlgorithm("SHA256withRSA");
         signature.setCert(cert);
         signature.sign(data);
+    }
+    @Test
+    public void testSignValidHash() throws MCAPIException {
+        System.out.println("SignSelectCert");
+        byte[] data="test".getBytes();
+        Signature signature=new Signature();
+        String Sha1Hash="6FEE4E5DBB351A252A397F09A50C70587123E824";//CertUtils.getThumbprint(CertUtils.selectCert("dd", "ddd"));
+        Structures.CERT_CONTEXT cert =CertUtils.findCertByHash(Sha1Hash);
+      //  Structures.CERT_CONTEXT cert = CertUtils.selectCert("Select cert for test", "Using Smartcard");
+        signature.setSignatureAlgorithm("SHA256withRSA");
+        signature.setCert(cert);
+        byte[] result=signature.sign(data);
+        String resultb64 = Base64.getEncoder().encodeToString(result);
+        System.out.println(resultb64);
     }
     
 }

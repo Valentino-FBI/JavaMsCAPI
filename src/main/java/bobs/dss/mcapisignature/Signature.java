@@ -108,11 +108,16 @@ public class Signature {
         }
         IntByReference dwSigLen = new IntByReference();
         if (Advapi32.INST.CryptSignHashA(hHash.getValue(), dwKeySpec.getValue(), null, 0, null, dwSigLen)) {
-            int signLen = dwSigLen.getValue();            
+            int signLen = dwSigLen.getValue();
             Pointer signPtr = new Memory(signLen);
             if (Advapi32.INST.CryptSignHashA(hHash.getValue(), dwKeySpec.getValue(), null, 0, signPtr, dwSigLen)) {
                 sign = new byte[signLen];
-                signPtr.read(0, sign, 0, signLen);
+                //Reverse read 
+                for (int n = 0; n < signLen; n++) {
+                    sign[n] = signPtr.getByte(signLen - 1 - n);
+                }
+                //signPtr.read(0, sign, 0, signLen);
+
                 System.out.println("OK Sign length: " + signLen);
             } else {
                 System.out.println("CryptSignHash Error " + Integer.toHexString(Native.getLastError()));
