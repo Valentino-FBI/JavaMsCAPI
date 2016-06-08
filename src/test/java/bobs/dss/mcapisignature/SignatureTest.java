@@ -13,7 +13,7 @@ import static org.junit.Assert.*;
  * @author sbalabanov
  */
 public class SignatureTest {
-    
+    static String testCertHash="D525114F7A061BA0BC83D94646AE95F855931175";
     public SignatureTest() {
     }
 
@@ -25,13 +25,22 @@ public class SignatureTest {
         System.out.println("sign");
         byte[] data="test".getBytes();
         Signature signature=new Signature();
-        String Sha1Hash="D525114F7A061BA0BC83D94646AE95F855931175";
+        String Sha1Hash=testCertHash;
         Structures.CERT_CONTEXT cert = CertUtils.findCertByHash(Sha1Hash);
         signature.setSignatureAlgorithm("SHA1withRSA");
         signature.setCert(cert);
         signature.sign(data);
-        // TODO review the generated test code and remove the default call to fail.
-       // fail("The test case is a prototype.");
+    }
+    @Test
+    public void testSignSelectCert() throws MCAPIException {
+        System.out.println("SignSelectCert");
+        byte[] data="test".getBytes();
+        Signature signature=new Signature();
+        String Sha1Hash=testCertHash;
+        Structures.CERT_CONTEXT cert = CertUtils.selectCert("Select cert for test", "Using Smartcard");
+        signature.setSignatureAlgorithm("SHA256withRSA");
+        signature.setCert(cert);
+        signature.sign(data);
     }
     
 }

@@ -116,6 +116,6 @@ public class CertUtils {
     }
 
     public static String getThumbprint(CERT_CONTEXT pcert) {
-        return DigestUtils.sha1Hex(certToBytes(pcert));
+        return DigestUtils.sha1Hex(certToBytes(pcert)).toUpperCase();
     }
 }
