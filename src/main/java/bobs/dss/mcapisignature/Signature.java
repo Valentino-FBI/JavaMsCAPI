@@ -13,6 +13,9 @@ import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.ptr.IntByReference;
 import com.sun.jna.ptr.PointerByReference;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Base64;
 
 /**
  *
@@ -142,76 +145,18 @@ public class Signature {
         }
     }
 
-    public static void main(String[] args) {
-        IntByReference dwKeySpec = new IntByReference();
-        PointerByReference provRef = new PointerByReference();
-        CERT_CONTEXT cert = CertUtils.selectCert("test", "test");
-        if (Crypt32.INST.CryptAcquireCertificatePrivateKey(cert, 0, null, provRef, dwKeySpec, null)) {
-            System.out.println("CryptAcquireCertificatePrivateKey ok");
-        } else {
-            System.out.println("CryptAcquireCertificatePrivateKey Error" + Integer.toHexString(Native.getLastError()));
-        }
-        int keyType = AT_SIGNATURE;
-        PointerByReference keyRef = new PointerByReference();
-
-        if (!Advapi32.INST.CryptGetUserKey(provRef.getValue(), keyType, keyRef)) {
-            keyType = AT_KEYEXCHANGE;
-            if (!Advapi32.INST.CryptGetUserKey(provRef.getValue(), keyType, keyRef)) {
-                System.out.println("CryptGetUserKey error " + Integer.toHexString(Native.getLastError()));
-
-            }
-        }
-        PointerByReference hHash = new PointerByReference();
-        Pointer hKey = new Pointer(0);
-
-        byte[] pin = "1234".getBytes();
-        Pointer ppp = new Memory(pin.length + 1);
-        byte[] bzero = {0};
-        ppp.write(0, pin, 0, pin.length);
-        ppp.write(pin.length, bzero, 0, 1); // добавляем в конец нудевой байт, иначе плохо работает
-        /*if (!Advapi32.INST.CryptSetProvParam(provRef.getValue(), PP_KEYEXCHANGE_PIN, ppp, 0)) {
-            System.out.println("SetProvParam error " + Integer.toHexString(Native.getLastError()));
-        }
+    public static void main(String[] args) throws MCAPIException, CertificateException, SelectCertificateExceprion {
+        byte[] data="test".getBytes();
         
-        if (!Advapi32.INST.CryptSetProvParam(provRef.getValue(), PP_SIGNATURE_PIN, ppp, 0)) {
-            System.out.println("SetProvParam error " + Integer.toHexString(Native.getLastError()));
-        }
-         */
-        if (Advapi32.INST.CryptCreateHash(provRef.getValue(), Advapi32.CALG_SHA1, hKey, 0, hHash)) {
-            System.out.println("CryptCreateHash ok");
-        } else {
-            System.out.println("CryptCreateHash Error " + Integer.toHexString(Native.getLastError()));
-        }
-
-        byte[] message = "test".getBytes();
-        byte[] sign;
-        Pointer ptr = new Memory(message.length);
-        ptr.write(0, message, 0, message.length);
-        PointerByReference aMessage = new PointerByReference(ptr);
-        IntByReference pMessageLen = new IntByReference(message.length);
-        if (!Advapi32.INST.CryptHashData(hHash.getValue(), aMessage.getValue(), pMessageLen.getValue(), 0)) {
-            System.out.println("CryptHashData Error " + Integer.toHexString(Native.getLastError()));
-        }
-        IntByReference dwSigLen = new IntByReference();
-        if (Advapi32.INST.CryptSignHashA(hHash.getValue(), dwKeySpec.getValue(), null, 0, null, dwSigLen)) {
-            int signLen = dwSigLen.getValue();
-            System.out.println("Sign length: " + dwSigLen);
-            Pointer signPtr = new Memory(signLen);
-            if (Advapi32.INST.CryptSignHashA(hHash.getValue(), dwKeySpec.getValue(), null, 0, signPtr, dwSigLen)) {
-                sign = new byte[signLen];
-                signPtr.read(0, sign, 0, signLen);
-                dump(sign, "dump.bin");
-                System.out.println("OK Sign length: " + signLen);
-            } else {
-                System.out.println("CryptSignHash Error " + Integer.toHexString(Native.getLastError()));
-            }
-        } else {
-            System.out.println("CryptSignHash Error " + Integer.toHexString(Native.getLastError()));
-        }
-
-        Crypt32.INST.CertFreeCertificateContext(cert);
-
-        Advapi32.INST.CryptReleaseContext(provRef.getValue(), 0);
+        System.out.println("Signing data '"+"test"+"' base64:"+Base64.getEncoder().encodeToString(data));
+        Structures.CERT_CONTEXT cert = CertUtils.selectCert("Select cert for test", "Using Smartcard");
+        X509Certificate x509Cert = CertUtils.getX509Certificate(cert);
+        System.out.println("Signing whit cert: '"+x509Cert.getSubjectDN().toString());
+        Signature signature=new Signature(cert);
+        signature.setSignatureAlgorithm("SHA256withRSA");        
+        byte[] result=signature.sign(data);
+        String resultb64 = Base64.getEncoder().encodeToString(result);
+        System.out.println("result base64:"+resultb64);
     }
 
     /**

@@ -89,11 +89,22 @@ public class CertUtils {
         }
         return chain;
     }
+    public static void viewCert(CERT_CONTEXT cert,String title) throws SelectCertificateExceprion{
+        if (!Cryptui.INST.CryptUIDlgViewContext(1, cert, null, title, 0, null)){
+            throw new SelectCertificateExceprion("CryptUIDlgViewContext call failed.");
+        }
+    }
+    public static CERT_CONTEXT selectCert() throws SelectCertificateExceprion {
+        return selectCert(null, null);
+    }
 
-    public static CERT_CONTEXT selectCert(String title, String desc) {
+    public static CERT_CONTEXT selectCert(String title, String desc) throws SelectCertificateExceprion {
         Pointer hStore = Crypt32.INST.CertOpenSystemStoreA(null, "MY");
         WinDef.HWND hwnd = null;
-        CERT_CONTEXT.ByReference certCont = Cryptui.INST.CryptUIDlgSelectCertificateFromStore(hStore, hwnd, title, desc, 0, 0, null);
+        CERT_CONTEXT.ByReference certCont =Cryptui.INST.CryptUIDlgSelectCertificateFromStore(hStore, hwnd, title, desc, 0, 0, null);
+        if(certCont==null){
+         throw new SelectCertificateExceprion("Select Certificate UI failed.");
+        }
         Crypt32.INST.CertCloseStore(hStore, 0);
         return certCont;
     }

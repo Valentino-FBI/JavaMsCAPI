@@ -5,6 +5,8 @@
  */
 package bobs.dss.mcapisignature;
 
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.Base64;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -33,8 +35,21 @@ public class SignatureTest {
         signature.sign(data);
     }
     @Test
-    public void testSignSelectCert() throws MCAPIException {
+    public void testSignSelectCert() throws MCAPIException, CertificateException, SelectCertificateExceprion {
         System.out.println("SignSelectCert");
+        byte[] data="test".getBytes();
+        Signature signature=new Signature();
+        String Sha1Hash=testCertHash;
+        Structures.CERT_CONTEXT cert = CertUtils.selectCert();
+        X509Certificate x509Cert = CertUtils.getX509Certificate(cert);
+        System.out.println(x509Cert.getSubjectDN().toString());
+        signature.setSignatureAlgorithm("SHA256withRSA");
+        signature.setCert(cert);
+        signature.sign(data);
+    }
+    @Test
+    public void testSignSelectCertWhitTitle() throws MCAPIException, SelectCertificateExceprion {
+        System.out.println("SignSelectCert Whit Title");
         byte[] data="test".getBytes();
         Signature signature=new Signature();
         String Sha1Hash=testCertHash;
@@ -44,13 +59,13 @@ public class SignatureTest {
         signature.sign(data);
     }
     @Test
-    public void testSignValidHash() throws MCAPIException {
+    public void testSignValidHash() throws MCAPIException, SelectCertificateExceprion {
         System.out.println("SignSelectCert");
         byte[] data="test".getBytes();
         Signature signature=new Signature();
         String Sha1Hash="6FEE4E5DBB351A252A397F09A50C70587123E824";//CertUtils.getThumbprint(CertUtils.selectCert("dd", "ddd"));
-        Structures.CERT_CONTEXT cert =CertUtils.findCertByHash(Sha1Hash);
-      //  Structures.CERT_CONTEXT cert = CertUtils.selectCert("Select cert for test", "Using Smartcard");
+       // Structures.CERT_CONTEXT cert =CertUtils.findCertByHash(Sha1Hash);
+       Structures.CERT_CONTEXT cert = CertUtils.selectCert();
         signature.setSignatureAlgorithm("SHA256withRSA");
         signature.setCert(cert);
         byte[] result=signature.sign(data);

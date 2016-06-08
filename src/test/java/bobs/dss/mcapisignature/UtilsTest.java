@@ -6,10 +6,15 @@
 package bobs.dss.mcapisignature;
 
 import static bobs.dss.mcapisignature.CertUtils.dump;
+import static bobs.dss.mcapisignature.SignatureTest.testCertHash;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import java.util.Base64;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 /**
  *
  * @author sbalabanov
@@ -96,7 +101,25 @@ public class UtilsTest {
         
         assertEquals(expResult, thumbprint);
      }
-
+    @Test
+    public void testSelectCert() throws CertificateException{
+        System.out.println("SelectCert");                
+        Structures.CERT_CONTEXT cert;
+        try {
+            cert = CertUtils.selectCert();
+            X509Certificate x509Cert = CertUtils.getX509Certificate(cert);
+            System.out.println(x509Cert.getSubjectDN().toString());
+        } catch (SelectCertificateExceprion ex) {
+            Logger.getLogger(UtilsTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    @Test
+    public void testViewCert() throws  SelectCertificateExceprion{
+        System.out.println("View Cert");
+       
+        Structures.CERT_CONTEXT cert = CertUtils.findCertByHash(testCertHash);
+        CertUtils.viewCert(cert, null);
+    }
 
 
 }

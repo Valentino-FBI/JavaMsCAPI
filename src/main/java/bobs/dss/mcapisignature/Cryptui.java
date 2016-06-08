@@ -30,4 +30,12 @@ public interface Cryptui extends Library {
                 int dwFlags,
                 PointerType pvReserved
         );
+        boolean CryptUIDlgViewContext(
+           int dwContextType,         //_In_       DWORD   dwContextType,
+           CERT_CONTEXT  pvContext,       //_In_ const void    *pvContext,
+           WinDef.HWND hwnd,         //_In_       HWND    hwnd,
+           String pwszTitle,         //_In_       LPCWSTR pwszTitle,
+           int dwFlags,         //_In_       DWORD   dwFlags,
+           PointerType pvReserved        //_In_       void    *pvReserved
+        );
     }
